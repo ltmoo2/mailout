@@ -1,6 +1,10 @@
 
 library(shiny)
 library(readxl)
+library(dplyr)
+library(janitor)
+library(XLConnect)
+library(xlsx)
 
 
 ui <- fluidPage(
@@ -24,14 +28,31 @@ ui <- fluidPage(
 
 server <- function(input, output) {
       
-        output$extract <- renderTable({
+        getData <- reactive({
             
-            req(input$file1)
+            inFile <- input$file1
             
-            df <- read_xlsx(input$file1$datapath)
+            if(is.null(input$file1))
+                return(NULL)
             
-            return(df)
+            read_xlsx(inFile$datapath) %>%
+                clean_names()
         })
+        
+        
+        output$extract <- renderTable(
+            getData()
+        )
+        
+        output$download <- downloadHandler(
+            filename = function(){
+                paste0("rdbtest.xlsx")
+            },
+            content = function(file){
+                write.xlsx(getData(), file)
+            }
+        )
+
 }
 
 
