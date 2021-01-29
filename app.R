@@ -82,17 +82,20 @@ server <- function(input, output) {
             listData()
         )
         
-        output$download <- downloadHandler(
-          filename = function(){"Test.xlsx"},
-          content = function(file){
-            fname <- paste(file, "xlsx", sep = ".")
-            writeWorksheet(wb, listData(), "Sheet1", startRow = 2, startCol = 1, header = FALSE)
-            saveWorkbook(wb, "Test.xlsx")
-            file.rename(fname, file)
-          },
-          contentType = "application/xlsx"
-        )
+        observeEvent(input$file1, writeWorksheet(wb, listData(), "Sheet1", startRow = 2, startCol = 1, header = FALSE))
+        observeEvent(input$file1, saveWorkbook(wb, paste0(maildate(), "-mailout/", maildate(),"-test.xlsx")))
         
+        
+        output$download <- downloadHandler(
+          filename <- function() {
+            paste("output", "zip", sep = ".")
+          },
+          
+          content <- function(file){
+            zip(file, files = paste0(maildate(), "-mailout"))
+          }
+        )
+
 
 }
 
