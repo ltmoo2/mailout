@@ -1,10 +1,13 @@
-
 library(shiny)
 library(readxl)
 library(dplyr)
 library(janitor)
 library(XLConnect)
-library(xlsx)
+library(tidyr)
+
+
+wb <- loadWorkbook("List Template.xlsx")
+setStyleAction(wb, XLC$"STYLE_ACTION.NONE")
 
 
 ui <- fluidPage(
@@ -27,6 +30,17 @@ ui <- fluidPage(
 
 
 server <- function(input, output) {
+  
+        maildate <- reactive({
+          
+          req(input$file1)
+          
+          as.character(Sys.Date())
+          
+        })
+        
+        observe(dir.create(paste0(maildate(), "-mailout")))
+    
       
         getData <- reactive({
             
@@ -35,23 +49,50 @@ server <- function(input, output) {
             if(is.null(input$file1))
                 return(NULL)
             
-            read_xlsx(inFile$datapath) %>%
-                clean_names()
+            data <- read_xlsx(inFile$datapath) %>%
+                clean_names() %>%
+                filter(!is.na(party_managing_agent_name)) %>%
+                filter(!grepl("/", party_managing_agent_name))
+            
+            return(data)
         })
         
+        listData <- reactive({
+          inFile <- input$file1
+          
+          if(is.null(input$file1))
+            return(NULL)
+          
+          list_data <- getData() %>%
+            select(municipality, party_managing_agent, party_managing_agent_name) %>%
+            group_by(party_managing_agent,party_managing_agent_name) %>%
+            summarise(Melbourne = as.numeric(sum(municipality == "Melbourne")),
+                      Yarra = as.numeric(sum(municipality == "Yara")),
+                      Darebin = as.numeric(sum(municipality == "Darebin")),
+                      Maribyrnong = as.numeric(sum(municipality == "Maribyrnong")),
+                      Knox = as.numeric(sum (municipality == "Knox")),
+                      Monash = as.numeric(sum (municipality == "Monash"))) %>%
+            separate(party_managing_agent_name, c("first", "last"), remove = FALSE, sep = "\\s") %>%
+            mutate(total = Melbourne + Yarra + Darebin + Maribyrnong + Knox + Monash)
+          
+          return(list_data)
+        })
         
         output$extract <- renderTable(
-            getData()
+            listData()
         )
         
         output$download <- downloadHandler(
-            filename = function(){
-                paste0("rdbtest.xlsx")
-            },
-            content = function(file){
-                write.xlsx(getData(), file)
-            }
+          filename = function(){"Test.xlsx"},
+          content = function(file){
+            fname <- paste(file, "xlsx", sep = ".")
+            writeWorksheet(wb, listData(), "Sheet1", startRow = 2, startCol = 1, header = FALSE)
+            saveWorkbook(wb, "Test.xlsx")
+            file.rename(fname, file)
+          },
+          contentType = "application/xlsx"
         )
+        
 
 }
 
