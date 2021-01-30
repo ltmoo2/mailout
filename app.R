@@ -4,6 +4,7 @@ library(dplyr)
 library(janitor)
 library(XLConnect)
 library(tidyr)
+library(DT)
 
 
 wb <- loadWorkbook("List Template.xlsx")
@@ -12,18 +13,20 @@ setStyleAction(wb, XLC$"STYLE_ACTION.NONE")
 
 ui <- fluidPage(
 
-    titlePanel("Auto-Mailout"),
+    titlePanel(title = div (img(src = "logo.png", width = 200, height = 80),
+               "Auto-Mailout")),
 
     sidebarLayout(
         sidebarPanel(
             fileInput("file1", "Upload RDB Extract", accept = c("xlsx")),
+            "Please wait for table to appear before downloading files",
             tags$hr(),
             downloadButton("download", "Download Mailout")
         ),
 
         # Show a plot of the generated distribution
         mainPanel(
-           tableOutput("extract")
+           DTOutput("extract")
         )
     )
 )
@@ -73,13 +76,15 @@ server <- function(input, output) {
                       Knox = as.numeric(sum (municipality == "Knox")),
                       Monash = as.numeric(sum (municipality == "Monash"))) %>%
             separate(party_managing_agent_name, c("first", "last"), remove = FALSE, sep = "\\s") %>%
-            mutate(total = Melbourne + Yarra + Darebin + Maribyrnong + Knox + Monash)
+            mutate(Total = Melbourne + Yarra + Darebin + Maribyrnong + Knox + Monash)
           
           return(list_data)
         })
         
-        output$extract <- renderTable(
-            listData()
+        output$extract <- renderDT(
+            listData(),
+            options = list(pageLength = 25, info = FALSE,
+                           lengthMenu = list(c(25, -1), c("25", "All")))
         )
         
         observeEvent(input$file1, writeWorksheet(wb, listData(), "Sheet1", startRow = 2, startCol = 1, header = FALSE))
