@@ -83,7 +83,37 @@ server <- function(input, output) {
         )
         
         observeEvent(input$file1, writeWorksheet(wb, listData(), "Sheet1", startRow = 2, startCol = 1, header = FALSE))
-        observeEvent(input$file1, saveWorkbook(wb, paste0(maildate(), "-mailout/", maildate(),"-test.xlsx")))
+        observeEvent(input$file1, saveWorkbook(wb, paste0(maildate(), "-mailout/", maildate(),"-Mailing List.xlsx")))
+        
+        observeEvent(input$file1, 
+                     for(i in (unique(getData()$party_managing_agent_name))){
+                       data <- subset(getData(), party_managing_agent_name == i)
+                       
+                       municipality <- data %>%
+                         select(municipality)
+                       
+                       adresses <- data %>%
+                         select(address)
+                       
+                       agency <- data %>%
+                         distinct(party_managing_agent)
+                       
+                       agent <- data %>%
+                         distinct(party_managing_agent_name)
+                       
+                       wb1 <- loadWorkbook("Information Template Blank.xlsx", create = TRUE)
+                       setStyleAction(wb1, XLC$"STYLE_ACTION.NONE")
+                       
+                       writeWorksheet(wb1, municipality, "City Council Questionnaire", startRow = 5, startCol = 2, header = FALSE)
+                       
+                       writeWorksheet(wb1, adresses, "City Council Questionnaire", startRow = 5, startCol = 3, header = FALSE)
+                       
+                       writeWorksheet(wb1, agency, "City Council Questionnaire", startRow = 2, startCol = 2, header = FALSE)
+                       
+                       writeWorksheet(wb1, agent, "City Council Questionnaire", startRow = 3, startCol = 2, header = FALSE)
+                       
+                       saveWorkbook(wb1, paste0(maildate(), "-mailout/",  unique(data$party_managing_agent_name), ".xlsx"))
+                     })
         
         
         output$download <- downloadHandler(
