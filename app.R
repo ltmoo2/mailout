@@ -10,8 +10,7 @@ library(DT)
 wb <- loadWorkbook("List Template.xlsx")
 setStyleAction(wb, XLC$"STYLE_ACTION.NONE")
 
-wb1 <- loadWorkbook("Information Template Blank.xlsx", create = TRUE)
-setStyleAction(wb1, XLC$"STYLE_ACTION.NONE")
+
 
 
 ui <- fluidPage(
@@ -73,7 +72,7 @@ server <- function(input, output) {
             select(municipality, party_managing_agent, party_managing_agent_name) %>%
             group_by(party_managing_agent,party_managing_agent_name) %>%
             summarise(Melbourne = as.numeric(sum(municipality == "Melbourne")),
-                      Yarra = as.numeric(sum(municipality == "Yara")),
+                      Yarra = as.numeric(sum(municipality == "Yarra")),
                       Darebin = as.numeric(sum(municipality == "Darebin")),
                       Maribyrnong = as.numeric(sum(municipality == "Maribyrnong")),
                       Knox = as.numeric(sum (municipality == "Knox")),
@@ -110,6 +109,9 @@ server <- function(input, output) {
                        
                        agent <- data %>%
                          distinct(party_managing_agent_name)
+                       
+                       wb1 <- loadWorkbook("Information Template Blank.xlsx", create = TRUE)
+                       setStyleAction(wb1, XLC$"STYLE_ACTION.NONE")
                        
                        
                        writeWorksheet(wb1, municipality, "City Council Questionnaire", startRow = 5, startCol = 2, header = FALSE)
