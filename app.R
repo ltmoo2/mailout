@@ -10,6 +10,9 @@ library(DT)
 wb <- loadWorkbook("List Template.xlsx")
 setStyleAction(wb, XLC$"STYLE_ACTION.NONE")
 
+wb1 <- loadWorkbook("Information Template Blank.xlsx", create = TRUE)
+setStyleAction(wb1, XLC$"STYLE_ACTION.NONE")
+
 
 ui <- fluidPage(
 
@@ -76,7 +79,8 @@ server <- function(input, output) {
                       Knox = as.numeric(sum (municipality == "Knox")),
                       Monash = as.numeric(sum (municipality == "Monash"))) %>%
             separate(party_managing_agent_name, c("first", "last"), remove = FALSE, sep = "\\s") %>%
-            mutate(Total = Melbourne + Yarra + Darebin + Maribyrnong + Knox + Monash)
+            mutate(Total = Melbourne + Yarra + Darebin + Maribyrnong + Knox + Monash) %>%
+            select(party_managing_agent:last, Total, Melbourne:Monash)
           
           return(list_data)
         })
@@ -101,13 +105,12 @@ server <- function(input, output) {
                          select(address)
                        
                        agency <- data %>%
-                         distinct(party_managing_agent)
+                         distinct(party_managing_agent) %>%
+                         top_n(1)
                        
                        agent <- data %>%
                          distinct(party_managing_agent_name)
                        
-                       wb1 <- loadWorkbook("Information Template Blank.xlsx", create = TRUE)
-                       setStyleAction(wb1, XLC$"STYLE_ACTION.NONE")
                        
                        writeWorksheet(wb1, municipality, "City Council Questionnaire", startRow = 5, startCol = 2, header = FALSE)
                        
