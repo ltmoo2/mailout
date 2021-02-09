@@ -5,6 +5,6 @@ account: ltmoo2
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3544871
-bundleId: 4198694
+bundleId: 4199030
 url: https://ltmoo2.shinyapps.io/mailout/
-when: 1612837079.4982
+when: 1612844193.60231
