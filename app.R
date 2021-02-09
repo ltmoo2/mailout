@@ -21,7 +21,7 @@ ui <- fluidPage(
     sidebarLayout(
         sidebarPanel(
             fileInput("file1", "Upload RDB Extract", accept = c("xlsx")),
-            "Please wait for table to appear before downloading files",
+            "Please wait for table to appear to the right before downloading files",
             tags$hr(),
             downloadButton("download", "Download Mailout")
         ),
@@ -110,7 +110,7 @@ server <- function(input, output) {
                        agent <- data %>%
                          distinct(party_managing_agent_name)
                        
-                       wb1 <- loadWorkbook("Information Template Blank.xlsx", create = TRUE)
+                       wb1 <- loadWorkbook("Information Template V2.xlsx", create = TRUE)
                        setStyleAction(wb1, XLC$"STYLE_ACTION.NONE")
                        
                        
