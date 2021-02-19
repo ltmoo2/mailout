@@ -122,7 +122,7 @@ server <- function(input, output) {
                        
                        writeWorksheet(wb1, agent, "City Council Questionnaire", startRow = 3, startCol = 2, header = FALSE)
                        
-                       saveWorkbook(wb1, paste0(maildate(), "-mailout/",  unique(data$party_managing_agent_name), ".xlsx"))
+                       saveWorkbook(wb1, paste0(maildate(), "-mailout/",  agency, "-", agent, ".xlsx"))
                      })
         
         
