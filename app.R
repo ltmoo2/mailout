@@ -11,8 +11,6 @@ wb <- loadWorkbook("List Template.xlsx")
 setStyleAction(wb, XLC$"STYLE_ACTION.NONE")
 
 
-
-
 ui <- fluidPage(
 
     titlePanel(title = div (img(src = "logo.png", width = 200, height = 80),
@@ -54,7 +52,7 @@ server <- function(input, output) {
             if(is.null(input$file1))
                 return(NULL)
             
-            data <- read_xlsx(inFile$datapath) %>%
+            data <- read_xlsx(inFile$datapath, trim_ws = TRUE) %>%
                 clean_names() %>%
                 filter(!is.na(party_managing_agent_name)) %>%
                 filter(!grepl("/", party_managing_agent_name))
@@ -70,7 +68,7 @@ server <- function(input, output) {
           
           list_data <- getData() %>%
             select(municipality, party_managing_agent, party_managing_agent_name) %>%
-            group_by(party_managing_agent,party_managing_agent_name) %>%
+            group_by(party_managing_agent_name) %>%
             summarise(Melbourne = as.numeric(sum(municipality == "Melbourne")),
                       Yarra = as.numeric(sum(municipality == "Yarra")),
                       Darebin = as.numeric(sum(municipality == "Darebin")),
@@ -79,7 +77,16 @@ server <- function(input, output) {
                       Monash = as.numeric(sum (municipality == "Monash"))) %>%
             separate(party_managing_agent_name, c("first", "last"), remove = FALSE, sep = "\\s") %>%
             mutate(Total = Melbourne + Yarra + Darebin + Maribyrnong + Knox + Monash) %>%
-            select(party_managing_agent:last, Total, Melbourne:Monash)
+            select(party_managing_agent_name:last, Total, Melbourne:Monash)
+          
+          agencies <- getData() %>%
+            select(party_managing_agent, party_managing_agent_name) %>%
+            group_by(party_managing_agent_name) %>%
+            slice(1) %>%
+            arrange(party_managing_agent)
+          
+          list_data <- agencies %>%
+            left_join(list_data)
           
           return(list_data)
         })
@@ -105,7 +112,7 @@ server <- function(input, output) {
                        
                        agency <- data %>%
                          distinct(party_managing_agent) %>%
-                         top_n(1)
+                         slice(1)
                        
                        agent <- data %>%
                          distinct(party_managing_agent_name)
