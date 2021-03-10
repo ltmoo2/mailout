@@ -5,7 +5,7 @@ library(janitor)
 library(XLConnect)
 library(tidyr)
 library(DT)
-
+library(shinycssloaders)
 
 wb <- loadWorkbook("List Template.xlsx")
 setStyleAction(wb, XLC$"STYLE_ACTION.NONE")
@@ -19,14 +19,13 @@ ui <- fluidPage(
     sidebarLayout(
         sidebarPanel(
             fileInput("file1", "Upload RDB Extract", accept = c("xlsx")),
-            "Please wait for table to appear to the right before downloading files",
-            tags$hr(),
             downloadButton("download", "Download Mailout")
         ),
 
-        # Show a plot of the generated distribution
+       
         mainPanel(
-           DTOutput("extract")
+           DTOutput("extract") %>%
+             withSpinner(color="#0dc5c1")
         )
     )
 )
