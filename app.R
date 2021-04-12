@@ -7,8 +7,6 @@ library(tidyr)
 library(DT)
 library(shinycssloaders)
 
-wb <- loadWorkbook("List Template.xlsx")
-setStyleAction(wb, XLC$"STYLE_ACTION.NONE")
 
 
 ui <- fluidPage(
@@ -33,6 +31,11 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   
+  
+        wb <- loadWorkbook("List Template.xlsx")
+        
+        setStyleAction(wb, XLC$"STYLE_ACTION.NONE")
+  
         maildate <- reactive({
           
           req(input$file1)
@@ -41,7 +44,7 @@ server <- function(input, output) {
           
         })
         
-        observe(dir.create(paste0(maildate(), "-mailout")))
+        observeEvent(input$file1, dir.create(paste0(maildate(), "-mailout")))
     
       
         getData <- reactive({
