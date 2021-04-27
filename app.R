@@ -35,16 +35,9 @@ server <- function(input, output) {
         wb <- loadWorkbook("List Template.xlsx")
         
         setStyleAction(wb, XLC$"STYLE_ACTION.NONE")
-  
-        maildate <- reactive({
-          
-          req(input$file1)
-          
-          as.character(Sys.Date())
-          
-        })
+
         
-        observeEvent(input$file1, dir.create(paste0(maildate(), "-mailout")))
+        dir.create(paste0(Sys.Date(), "-mailout"))
     
       
         getData <- reactive({
@@ -100,7 +93,7 @@ server <- function(input, output) {
         )
         
         observeEvent(input$file1, writeWorksheet(wb, listData(), "Sheet1", startRow = 2, startCol = 1, header = FALSE))
-        observeEvent(input$file1, saveWorkbook(wb, paste0(maildate(), "-mailout/", maildate(),"-Mailing List.xlsx")))
+        observeEvent(input$file1, saveWorkbook(wb, paste0(Sys.Date(), "-mailout/", Sys.Date(),"-Mailing List.xlsx")))
         
         observeEvent(input$file1, 
                      for(i in (unique(getData()$party_managing_agent_name))){
@@ -131,7 +124,7 @@ server <- function(input, output) {
                        
                        writeWorksheet(wb1, agent, "City Council Questionnaire", startRow = 3, startCol = 2, header = FALSE)
                        
-                       saveWorkbook(wb1, paste0(maildate(), "-mailout/",  agency, "-", agent, ".xlsx"))
+                       saveWorkbook(wb1, paste0(Sys.Date(), "-mailout/",  agency, "-", agent, ".xlsx"))
                      })
         
         
@@ -141,7 +134,7 @@ server <- function(input, output) {
           },
           
           content <- function(file){
-            zip(file, files = paste0(maildate(), "-mailout"))
+            zip(file, files = paste0(Sys.Date(), "-mailout"))
           }
         )
 
