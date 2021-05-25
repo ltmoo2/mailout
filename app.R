@@ -6,6 +6,7 @@ library(XLConnect)
 library(tidyr)
 library(DT)
 library(shinycssloaders)
+library(stringr)
 
 
 
@@ -50,7 +51,8 @@ server <- function(input, output) {
             data <- read_xlsx(inFile$datapath, trim_ws = TRUE) %>%
                 clean_names() %>%
                 filter(!is.na(party_managing_agent_name)) %>%
-                filter(!grepl("/", party_managing_agent_name))
+                mutate(party_managing_agent_name = str_replace(party_managing_agent_name, "/", " & ")) %>%
+                mutate(party_managing_agent = str_replace(party_managing_agent, "/", " "))
             
             return(data)
         })
